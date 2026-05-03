@@ -1,0 +1,508 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Notes" Width="380" Height="420" MinWidth="280" MinHeight="180"
+        WindowStartupLocation="Manual" WindowStyle="None"
+        Background="{DynamicResource Bg}" Foreground="{DynamicResource Fg}"
+        FontFamily="Segoe UI" FontSize="13" Topmost="True"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="32" CornerRadius="0"
+                            GlassFrameThickness="0" UseAeroCaptionButtons="False"
+                            ResizeBorderThickness="6"/>
+    </shell:WindowChrome.WindowChrome>
+    <Window.Resources>
+
+        <!-- Title bar buttons (min, close) -->
+        <Style TargetType="{x:Type Button}" x:Key="ChromeBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource FgMute}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="{DynamicResource BgHov}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type Button}" x:Key="CloseBtn" BasedOn="{StaticResource ChromeBtn}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="#C42B1C"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type Button}" x:Key="StripBtn" BasedOn="{StaticResource ChromeBtn}">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="32"/>
+        </Style>
+
+        <Style TargetType="{x:Type Button}" x:Key="StripBtnPlus" BasedOn="{StaticResource StripBtn}">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Light"/>
+        </Style>
+
+        <!-- Custom tab button (no TabControl) -->
+        <Style x:Key="TabBtn" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="12,0,12,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource BgHov}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TabLabel" TargetType="{x:Type TextBlock}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource FgMute}"/>
+        </Style>
+
+        <!-- Editor -->
+        <Style TargetType="{x:Type TextBox}" x:Key="Editor">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="14,10,14,14"/>
+            <Setter Property="FontSize" Value="{DynamicResource EditorFontSize}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource Fg}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource Selection}"/>
+            <Setter Property="AcceptsReturn" Value="True"/>
+            <Setter Property="AcceptsTab" Value="True"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        </Style>
+
+        <Style TargetType="{x:Type ContextMenu}">
+            <Setter Property="Background" Value="{DynamicResource BgHov}"/>
+            <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HasDropShadow" Value="False"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style TargetType="{x:Type MenuItem}">
+            <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="14,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="b" Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="{DynamicResource Bg}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Settings styles -->
+
+        <Style TargetType="{x:Type TextBlock}" x:Key="SectionLabel">
+            <Setter Property="Foreground" Value="{DynamicResource FgMute}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style TargetType="{x:Type Border}" x:Key="ThemeSwatch">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style TargetType="{x:Type Button}" x:Key="StepperBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="{DynamicResource BgHov}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type Button}" x:Key="ActionBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="{DynamicResource BgHov}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type TextBox}" x:Key="HexInput">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource Fg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="0,4"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style TargetType="{x:Type CheckBox}">
+            <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style TargetType="{x:Type Border}" x:Key="SubTabBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource BgHov}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
+    <Border x:Name="RootBorder" BorderBrush="{DynamicResource Border}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title bar -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Notes-mode title bar content -->
+                <Grid x:Name="NotesTitleBar" Grid.Column="0">
+                    <ScrollViewer x:Name="TabsScroll"
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  Background="Transparent">
+                        <StackPanel x:Name="TabsHost" Orientation="Horizontal"/>
+                    </ScrollViewer>
+                    <Border x:Name="ScrollHintLeft" Width="6" HorizontalAlignment="Left"
+                            VerticalAlignment="Center" Height="14"
+                            IsHitTestVisible="False" Visibility="Collapsed"
+                            Background="Transparent" CornerRadius="1">
+                        <Rectangle Width="2" Fill="{DynamicResource FgMute}" Opacity="0.5"/>
+                    </Border>
+                    <Border x:Name="ScrollHintRight" Width="6" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" Height="14"
+                            IsHitTestVisible="False" Visibility="Collapsed"
+                            Background="Transparent" CornerRadius="1">
+                        <Rectangle Width="2" Fill="{DynamicResource FgMute}" Opacity="0.5"/>
+                    </Border>
+                </Grid>
+
+                <!-- Settings-mode title bar content -->
+                <Grid x:Name="SettingsTitleBar" Grid.Column="0" Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Button x:Name="BtnBackToNotes" Style="{StaticResource ChromeBtn}"
+                                Content="&#xE72B;" Width="32"/>
+                        <TextBlock x:Name="SettingsTitle" Text="Settings"
+                                   VerticalAlignment="Center" Margin="2,0,0,0"
+                                   Foreground="{DynamicResource Fg}"
+                                   FontSize="13" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- System buttons (always visible) -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button x:Name="BtnAddTab"   Style="{StaticResource StripBtnPlus}" Content="+"/>
+                    <Button x:Name="BtnSettings" Style="{StaticResource ChromeBtn}" Content="&#xE713;"/>
+                    <Button x:Name="BtnMin"      Style="{StaticResource ChromeBtn}" Content="&#xE921;"/>
+                    <Button x:Name="BtnClose"    Style="{StaticResource CloseBtn}"  Content="&#xE8BB;"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Content -->
+            <Grid Grid.Row="1">
+                <ContentControl x:Name="EditorHost" Margin="6,0,6,6"/>
+
+                <Grid x:Name="SearchPanel" Visibility="Collapsed" Margin="6,0,6,6"
+                      Background="{DynamicResource Bg}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,4,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="SearchInput" Grid.Column="0"
+                                 Background="{DynamicResource BgHov}" Foreground="{DynamicResource Fg}"
+                                 CaretBrush="{DynamicResource Fg}" SelectionBrush="{DynamicResource Selection}"
+                                 BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                                 Padding="8,5" FontSize="13" VerticalContentAlignment="Center"/>
+                        <TextBlock x:Name="SearchCount" Grid.Column="1"
+                                   Foreground="{DynamicResource FgMute}" FontSize="11"
+                                   VerticalAlignment="Center" Margin="10,0,4,0"/>
+                        <Button x:Name="BtnSearchClose" Grid.Column="2"
+                                Style="{StaticResource StripBtn}" Content="&#xE8BB;"/>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel x:Name="SearchResultsHost"/>
+                    </ScrollViewer>
+                </Grid>
+
+                <Grid x:Name="SettingsView" Visibility="Collapsed" Margin="6,8,6,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="2,0,2,12">
+
+                            <!-- Sub-tabs -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <Border x:Name="SubTabGeneral"   Style="{StaticResource SubTabBtn}">
+                                    <TextBlock x:Name="LblTabGeneral" Text="General" FontSize="12"
+                                               Foreground="{DynamicResource Fg}"/>
+                                </Border>
+                                <Border x:Name="SubTabShortcuts" Style="{StaticResource SubTabBtn}">
+                                    <TextBlock x:Name="LblTabShortcuts" Text="Shortcuts" FontSize="12"
+                                               Foreground="{DynamicResource FgMute}"/>
+                                </Border>
+                                <Border x:Name="SubTabTrash" Style="{StaticResource SubTabBtn}">
+                                    <TextBlock x:Name="LblTabTrash" Text="Trash" FontSize="12"
+                                               Foreground="{DynamicResource FgMute}"/>
+                                </Border>
+                                <Border x:Name="SubTabInformation" Style="{StaticResource SubTabBtn}">
+                                    <TextBlock x:Name="LblTabInformation" Text="Information" FontSize="12"
+                                               Foreground="{DynamicResource FgMute}"/>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- General pane -->
+                            <StackPanel x:Name="PaneGeneral">
+                                <TextBlock x:Name="LblTheme" Text="THEME" Style="{StaticResource SectionLabel}"/>
+                                <StackPanel Orientation="Horizontal" Margin="14,0,0,0">
+                                    <Border x:Name="SwDeepBlack" Style="{StaticResource ThemeSwatch}" Tag="deep_black">
+                                        <Border Background="#0A0A0A" CornerRadius="3"
+                                                BorderThickness="1" BorderBrush="#888"/>
+                                    </Border>
+                                    <Border x:Name="SwDark" Style="{StaticResource ThemeSwatch}" Tag="dark">
+                                        <Border Background="#1A1A1A" CornerRadius="3"
+                                                BorderThickness="1" BorderBrush="#888"/>
+                                    </Border>
+                                    <Border x:Name="SwWhite" Style="{StaticResource ThemeSwatch}" Tag="white">
+                                        <Border Background="#FFFFFF" CornerRadius="3"
+                                                BorderThickness="1" BorderBrush="#888"/>
+                                    </Border>
+                                    <Border x:Name="SwCream" Style="{StaticResource ThemeSwatch}" Tag="cream">
+                                        <Border Background="#FAF6EE" CornerRadius="3"
+                                                BorderThickness="1" BorderBrush="#888"/>
+                                    </Border>
+                                    <Border x:Name="SwGlass" Style="{StaticResource ThemeSwatch}" Tag="glass">
+                                        <Border CornerRadius="3" BorderThickness="1" BorderBrush="#888">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#F0FAFF" Offset="0"/>
+                                                    <GradientStop Color="#A8D0E8" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                        </Border>
+                                    </Border>
+                                    <Border x:Name="SwCustom" Style="{StaticResource ThemeSwatch}" Tag="custom">
+                                        <Border CornerRadius="3" BorderThickness="1" BorderBrush="#888">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#E91E63" Offset="0"/>
+                                                    <GradientStop Color="#FF9800" Offset="0.3"/>
+                                                    <GradientStop Color="#FFEB3B" Offset="0.5"/>
+                                                    <GradientStop Color="#4CAF50" Offset="0.7"/>
+                                                    <GradientStop Color="#2196F3" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                        </Border>
+                                    </Border>
+                                </StackPanel>
+
+                                <Grid x:Name="CustomColorRow" Margin="14,12,0,0" Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="ColorSwatch" Width="22" Height="22"
+                                            Background="#1A1A1A"
+                                            BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                                            CornerRadius="3"
+                                            Margin="0,0,10,0" VerticalAlignment="Center"
+                                            Cursor="Hand"/>
+                                    <TextBox x:Name="HexInputBox" Grid.Column="1"
+                                             Style="{StaticResource HexInput}"
+                                             VerticalAlignment="Center" MaxLength="7"/>
+                                </Grid>
+
+                                <TextBlock x:Name="LblFontSize" Text="TEXT SIZE" Style="{StaticResource SectionLabel}" Margin="0,20,0,8"/>
+                                <StackPanel Orientation="Horizontal" Margin="14,0,0,0">
+                                    <Button x:Name="BtnFontMinus" Style="{StaticResource StepperBtn}" Content="&#x2212;"/>
+                                    <TextBlock x:Name="FontSizeLabel" Text="14"
+                                               Width="42" TextAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource Fg}" FontSize="13"/>
+                                    <Button x:Name="BtnFontPlus" Style="{StaticResource StepperBtn}" Content="+"/>
+                                </StackPanel>
+
+                                <TextBlock x:Name="LblPosition" Text="POSITION" Style="{StaticResource SectionLabel}" Margin="0,20,0,8"/>
+                                <Button x:Name="BtnReposition" Style="{StaticResource ActionBtn}"
+                                        Content="Reset position and size"
+                                        HorizontalAlignment="Stretch" Margin="14,0,0,0"/>
+
+                                <TextBlock x:Name="LblStartup" Text="STARTUP" Style="{StaticResource SectionLabel}" Margin="0,20,0,8"/>
+                                <CheckBox x:Name="ChkLaunchOnStartup" Content="Launch with Windows" Margin="14,0,0,0"/>
+                            </StackPanel>
+
+                            <!-- Trash pane -->
+                            <StackPanel x:Name="PaneTrash" Visibility="Collapsed">
+                                <TextBlock x:Name="LblTrash" Text="TRASH" Style="{StaticResource SectionLabel}"/>
+                                <StackPanel x:Name="TrashHost" Margin="0,0,0,0"/>
+                                <Button x:Name="BtnEmptyTrash" Style="{StaticResource ActionBtn}"
+                                        Content="Empty trash" Margin="0,12,0,0" HorizontalAlignment="Left"
+                                        Visibility="Collapsed" FontSize="11" Padding="10,5"/>
+                            </StackPanel>
+
+                            <!-- Information pane -->
+                            <StackPanel x:Name="PaneInformation" Visibility="Collapsed">
+                                <TextBlock Foreground="{DynamicResource Fg}" FontSize="12"
+                                           TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,12">
+                                    Application gratuite réalisée par <Run FontWeight="SemiBold">Le Geai Informatique</Run>.<LineBreak/>
+                                    Conçue d'abord pour un usage personnel, puis offerte au monde.
+                                </TextBlock>
+                                <TextBlock Foreground="{DynamicResource FgHov}" FontSize="11"
+                                           TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,12">
+                                    Code source consultable. Usage personnel autorisé. Mention de Le Geai Informatique vivement conseillée. Usage commercial interdit.
+                                </TextBlock>
+                                <TextBlock Foreground="{DynamicResource FgHov}" FontSize="11"
+                                           TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,12" FontStyle="Italic">
+                                    Notre développeur, Data Engineer qui crée des IA par ailleurs, vous garantit une application sans aucune IA. Pour vous seul, sans assistance, comme à l'époque. Si ça vous semble étrange, c'est normal. Tenez bon.
+                                </TextBlock>
+                                <TextBlock Foreground="{DynamicResource FgMute}" FontSize="11"
+                                           TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,16">
+                                    Vos retours, suggestions et signalements de bugs sont les bienvenus.
+                                </TextBlock>
+                                <Border Background="{DynamicResource Border}" Height="1" Margin="0,4,0,12"/>
+                                <TextBlock Foreground="{DynamicResource FgMute}" FontSize="11"
+                                           TextWrapping="Wrap" LineHeight="18">
+                                    <Run Text="Version 1.0.0 — mai 2026"/>
+                                    <LineBreak/>
+                                    <Hyperlink x:Name="LinkSite"
+                                               NavigateUri="https://legeai-informatique.fr"
+                                               Foreground="{DynamicResource Fg}">legeai-informatique.fr</Hyperlink>
+                                    <LineBreak/>
+                                    <Run Text="Soutenir : "/>
+                                    <Hyperlink x:Name="LinkSupport"
+                                               NavigateUri="https://tipeee.com/legeai"
+                                               Foreground="{DynamicResource Fg}">tipeee.com/legeai</Hyperlink>
+                                </TextBlock>
+                                <Button x:Name="BtnQuitApp" Style="{StaticResource ActionBtn}"
+                                        Content="Quit Note" Margin="0,16,0,0" HorizontalAlignment="Left"
+                                        FontSize="11" Padding="14,6"/>
+                            </StackPanel>
+
+                            <!-- Shortcuts pane -->
+                            <StackPanel x:Name="PaneShortcuts" Visibility="Collapsed">
+                                <TextBlock x:Name="LblShortcutsHint" Style="{StaticResource SectionLabel}"
+                                           Text="GLOBAL HOTKEYS - CLICK TO CAPTURE, ESC TO CANCEL"
+                                           TextWrapping="Wrap"/>
+                                <StackPanel x:Name="ShortcutsHost"/>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
